@@ -29,7 +29,7 @@ def create_app():
     app.register_blueprint(api_bp)
     app.register_blueprint(views_bp)
 
-    # Initialize database
+    # Initialize components database
     with app.app_context():
         init_db()
         _seed_if_empty()
