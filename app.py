@@ -21,6 +21,7 @@ from services import prediction as prediction_service
 
 def create_app():
     """Application factory."""
+    # See documentation for details
     app = Flask(__name__)
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "agriwatch-dev-key")
     app.config["SQLALCHEMY_DATABASE_URI"] = config.SQLALCHEMY_DATABASE_URI
