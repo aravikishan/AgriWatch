@@ -25,7 +25,7 @@ def create_app():
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "agriwatch-dev-key")
     app.config["SQLALCHEMY_DATABASE_URI"] = config.SQLALCHEMY_DATABASE_URI
 
-    # Register blueprints
+    # v1.0.1 - Register blueprints
     app.register_blueprint(api_bp)
     app.register_blueprint(views_bp)
 
