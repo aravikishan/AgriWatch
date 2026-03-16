@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Predictions{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Crop Predictions</h1>
+    <p class="subtitle">Yield estimates, growth stage tracking, and field health analysis</p>
+</div>
+
+{% for item in predictions %}
+<div class="prediction-card">
+    <div class="prediction-header">
+        <div>
+            <h2>{{ item.field.name }}</h2>
+            <span class="crop-badge">{{ item.field.crop_type }}</span>
+            <span class="size-label">{{ item.field.size_hectares }} ha</span>
+        </div>
+        <button class="btn btn-primary" onclick="generatePrediction({{ item.field.id }})">Refresh Prediction</button>
+    </div>
+
+    {% if item.prediction %}
+    <div class="prediction-body">
+        <div class="prediction-metrics">
+            <div class="metric-card">
+                <span class="metric-label">Growth Stage</span>
+                <span class="metric-value stage-badge">{{ item.prediction.growth_stage }}</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Accumulated GDD</span>
+                <span class="metric-value">{{ item.prediction.accumulated_gdd }}</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Predicted Yield</span>
+                <span class="metric-value">{{ item.prediction.predicted_yield or '--' }} {{ item.prediction.yield_unit }}</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Confidence</span>
+                <span class="metric-value">{{ (item.prediction.confidence * 100) | round(0) }}%</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Health Score</span>
+                <div class="health-gauge" data-score="{{ item.health }}">
+                    <div class="gauge-fill" style="width: {{ item.health }}%"></div>
+                    <span class="gauge-label">{{ item.health }}%</span>
+                </div>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Est. Harvest</span>
+                <span class="metric-value">{{ item.prediction.estimated_harvest_date[:10] if item.prediction.estimated_harvest_date else '--' }}</span>
+            </div>
+        </div>
+
+        <div class="growth-progress">
+            <h3>Growth Progress</h3>
+            <div class="stage-bar">
+                {% set stages = ['Germination', 'Seedling', 'Vegetative', 'Flowering', 'Fruit Development', 'Maturity', 'Harvest Ready'] %}
+                {% for stage in stages %}
+                <div class="stage-segment {% if loop.index0 <= item.prediction.growth_stage_index %}completed{% endif %} {% if loop.index0 == item.prediction.growth_stage_index %}current{% endif %}">
+                    <span class="stage-dot"></span>
+                    <span class="stage-name">{{ stage }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="field-zone-map">
+            <h3>Field Zone Health Map</h3>
+            <div class="zone-grid" id="zone-grid-{{ item.field.id }}"
+                 style="grid-template-columns: repeat({{ item.field.grid_cols }}, 1fr);">
+                {% for row in item.zones %}
+                {% for score in row %}
+                <div class="zone-cell" style="background-color: {{ 'hsl(%d, 60%%, 45%%)' | format((score / 100 * 120) | int) }}"
+                     title="Zone ({{ loop.parent.loop.index0 }},{{ loop.index0 }}): {{ score }}%">
+                    <span>{{ score | round(0) }}%</span>
+                </div>
+                {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="prediction-empty">
+        <p>No prediction available yet. Click "Refresh Prediction" to generate one.</p>
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function refreshAll() {
+    document.querySelectorAll('.prediction-card .btn-primary').forEach(btn => btn.click());
+}
+</script>
+{% endblock %}

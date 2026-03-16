@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}Fields{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Field Management</h1>
+    <button class="btn btn-primary" onclick="showAddFieldModal()">+ Add Field</button>
+</div>
+
+<div class="fields-table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Crop</th>
+                <th>Size (ha)</th>
+                <th>Grid</th>
+                <th>Planting Date</th>
+                <th>Sensors</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for field in fields %}
+            <tr>
+                <td><strong>{{ field.name }}</strong></td>
+                <td><span class="crop-badge">{{ field.crop_type }}</span></td>
+                <td>{{ field.size_hectares }}</td>
+                <td>{{ field.grid_rows }}x{{ field.grid_cols }}</td>
+                <td>{{ field.planting_date.strftime('%Y-%m-%d') if field.planting_date else 'Not set' }}</td>
+                <td>{{ field.sensors | length }}</td>
+                <td class="action-cell">
+                    <button class="btn btn-sm" onclick="editField({{ field.id }})">Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteField({{ field.id }})">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Add/Edit Field Modal -->
+<div id="field-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeModal('field-modal')">&times;</span>
+        <h2 id="field-modal-title">Add Field</h2>
+        <form id="field-form" onsubmit="submitField(event)">
+            <input type="hidden" id="field-id" value="">
+            <div class="form-group">
+                <label for="field-name">Field Name</label>
+                <input type="text" id="field-name" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="crop-type">Crop Type</label>
+                    <select id="crop-type">
+                        <option value="corn">Corn</option>
+                        <option value="wheat">Wheat</option>
+                        <option value="soybean">Soybean</option>
+                        <option value="rice">Rice</option>
+                        <option value="tomato">Tomato</option>
+                        <option value="potato">Potato</option>
+                        <option value="cotton">Cotton</option>
+                        <option value="sunflower">Sunflower</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="size-hectares">Size (hectares)</label>
+                    <input type="number" id="size-hectares" step="0.1" value="1.0">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="grid-rows">Grid Rows</label>
+                    <input type="number" id="grid-rows" min="1" max="10" value="4">
+                </div>
+                <div class="form-group">
+                    <label for="grid-cols">Grid Cols</label>
+                    <input type="number" id="grid-cols" min="1" max="10" value="4">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="planting-date">Planting Date</label>
+                <input type="date" id="planting-date">
+            </div>
+            <div class="form-group">
+                <label for="field-notes">Notes</label>
+                <textarea id="field-notes" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Field</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showAddFieldModal() {
+    document.getElementById('field-modal-title').textContent = 'Add Field';
+    document.getElementById('field-form').reset();
+    document.getElementById('field-id').value = '';
+    document.getElementById('field-modal').style.display = 'flex';
+}
+
+function editField(id) {
+    fetch('/api/fields/' + id)
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('field-modal-title').textContent = 'Edit Field';
+            document.getElementById('field-id').value = data.id;
+            document.getElementById('field-name').value = data.name;
+            document.getElementById('crop-type').value = data.crop_type;
+            document.getElementById('size-hectares').value = data.size_hectares;
+            document.getElementById('grid-rows').value = data.grid_rows;
+            document.getElementById('grid-cols').value = data.grid_cols;
+            if (data.planting_date) {
+                document.getElementById('planting-date').value = data.planting_date.split('T')[0];
+            }
+            document.getElementById('field-notes').value = data.notes || '';
+            document.getElementById('field-modal').style.display = 'flex';
+        });
+}
+
+function deleteField(id) {
+    if (!confirm('Delete this field and all associated data?')) return;
+    fetch('/api/fields/' + id, { method: 'DELETE' })
+        .then(() => location.reload());
+}
+
+function submitField(e) {
+    e.preventDefault();
+    const id = document.getElementById('field-id').value;
+    const payload = {
+        name: document.getElementById('field-name').value,
+        crop_type: document.getElementById('crop-type').value,
+        size_hectares: parseFloat(document.getElementById('size-hectares').value),
+        grid_rows: parseInt(document.getElementById('grid-rows').value),
+        grid_cols: parseInt(document.getElementById('grid-cols').value),
+        planting_date: document.getElementById('planting-date').value || null,
+        notes: document.getElementById('field-notes').value,
+    };
+    const url = id ? '/api/fields/' + id : '/api/fields';
+    const method = id ? 'PUT' : 'POST';
+    fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+    }).then(() => location.reload());
+}
+
+function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Sensors{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Sensor Monitoring</h1>
+    <div class="header-actions">
+        <select id="field-filter" onchange="filterByField()">
+            <option value="">All Fields</option>
+            {% for field in fields %}
+            <option value="{{ field.id }}">{{ field.name }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-primary" onclick="simulateAll()">Simulate All</button>
+    </div>
+</div>
+
+<div class="sensor-gauges" id="gauge-container">
+    {% for sensor in sensors %}
+    <div class="gauge-card" data-sensor-id="{{ sensor.id }}" data-field-id="{{ sensor.field_id }}" data-type="{{ sensor.sensor_type }}">
+        <h4>{{ sensor.name }}</h4>
+        <div class="gauge-widget" id="gauge-{{ sensor.id }}">
+            <div class="gauge-arc">
+                <svg viewBox="0 0 120 70" class="gauge-svg">
+                    <path d="M10 65 A50 50 0 0 1 110 65" fill="none" stroke="#e0d5c1" stroke-width="8" stroke-linecap="round"/>
+                    <path d="M10 65 A50 50 0 0 1 110 65" fill="none" stroke="#4a7c59" stroke-width="8" stroke-linecap="round"
+                          class="gauge-value-arc" id="arc-{{ sensor.id }}" stroke-dasharray="0 157"/>
+                </svg>
+                <span class="gauge-reading" id="reading-{{ sensor.id }}">--</span>
+            </div>
+            <span class="gauge-type">{{ sensor.sensor_type | replace('_', ' ') | title }}</span>
+            <span class="gauge-field-name">{{ sensor.field.name if sensor.field else '' }}</span>
+        </div>
+        <button class="btn btn-sm" onclick="viewHistory({{ sensor.id }}, '{{ sensor.sensor_type }}')">History</button>
+    </div>
+    {% endfor %}
+</div>
+
+<section class="dashboard-section">
+    <h2>Time-Series Chart</h2>
+    <div class="chart-controls">
+        <select id="chart-sensor" onchange="loadSensorChart()">
+            <option value="">Select a sensor...</option>
+            {% for sensor in sensors %}
+            <option value="{{ sensor.id }}">{{ sensor.name }} ({{ sensor.sensor_type }})</option>
+            {% endfor %}
+        </select>
+        <select id="chart-hours" onchange="loadSensorChart()">
+            <option value="6">Last 6 hours</option>
+            <option value="24" selected>Last 24 hours</option>
+            <option value="48">Last 48 hours</option>
+            <option value="168">Last 7 days</option>
+        </select>
+    </div>
+    <div class="chart-container">
+        <canvas id="sensor-chart" width="800" height="350"></canvas>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadLatestReadings();
+    setInterval(loadLatestReadings, 30000);
+});
+
+function filterByField() {
+    const fieldId = document.getElementById('field-filter').value;
+    const cards = document.querySelectorAll('.gauge-card');
+    cards.forEach(card => {
+        if (!fieldId || card.dataset.fieldId === fieldId) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function simulateAll() {
+    const fieldId = document.getElementById('field-filter').value;
+    if (fieldId) {
+        simulateReadings(parseInt(fieldId));
+    } else {
+        fetch('/api/fields').then(r => r.json()).then(fields => {
+            fields.forEach(f => simulateReadings(f.id));
+        });
+    }
+}
+
+function viewHistory(sensorId, sensorType) {
+    document.getElementById('chart-sensor').value = sensorId;
+    loadSensorChart();
+    document.querySelector('.dashboard-section').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+{% endblock %}

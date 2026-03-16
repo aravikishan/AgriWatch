@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AgriWatch{% endblock %} | IoT Farm Monitor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="nav-icon">&#127793;</span>
+            <span class="nav-title">AgriWatch</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/" class="{% if request.path == '/' %}active{% endif %}">Dashboard</a></li>
+            <li><a href="/fields" class="{% if request.path == '/fields' %}active{% endif %}">Fields</a></li>
+            <li><a href="/sensors" class="{% if request.path == '/sensors' %}active{% endif %}">Sensors</a></li>
+            <li><a href="/predictions" class="{% if request.path == '/predictions' %}active{% endif %}">Predictions</a></li>
+            <li><a href="/about" class="{% if request.path == '/about' %}active{% endif %}">About</a></li>
+        </ul>
+    </nav>
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="footer">
+        <p>&copy; 2024 AgriWatch &mdash; IoT Agricultural Monitoring Platform</p>
+    </footer>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

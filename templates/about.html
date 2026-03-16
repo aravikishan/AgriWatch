@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+{% block content %}
+<div class="about-page">
+    <h1>About AgriWatch</h1>
+
+    <div class="about-section">
+        <h2>Overview</h2>
+        <p>
+            AgriWatch is an IoT agricultural monitoring platform designed to help farmers
+            and agronomists make data-driven decisions. By collecting and analyzing sensor
+            data from across your fields, AgriWatch provides real-time insights into crop
+            health, growth progress, and yield predictions.
+        </p>
+    </div>
+
+    <div class="about-section">
+        <h2>Features</h2>
+        <ul class="feature-list">
+            <li><strong>Real-time Sensor Monitoring</strong> &mdash; Track temperature, humidity, soil moisture, pH, and light intensity with IoT sensors deployed across your fields.</li>
+            <li><strong>Diurnal Pattern Simulation</strong> &mdash; Realistic sensor data simulation that follows natural day/night cycles and environmental patterns.</li>
+            <li><strong>Crop Yield Prediction</strong> &mdash; Estimate expected yields using regression models based on sensor history and growth conditions.</li>
+            <li><strong>Growth Stage Tracking</strong> &mdash; Monitor crop development using Growing Degree Days (GDD) to determine current growth stage.</li>
+            <li><strong>Field Zone Mapping</strong> &mdash; Grid-based field visualization with color-coded health scores for each zone.</li>
+            <li><strong>Alert System</strong> &mdash; Automatic alerts when sensor readings fall outside optimal ranges.</li>
+            <li><strong>REST API</strong> &mdash; Full API access for all operations, enabling integration with other farm management tools.</li>
+        </ul>
+    </div>
+
+    <div class="about-section">
+        <h2>Technology Stack</h2>
+        <div class="tech-grid">
+            <div class="tech-item">
+                <strong>Backend</strong>
+                <span>Python / Flask</span>
+            </div>
+            <div class="tech-item">
+                <strong>Database</strong>
+                <span>SQLite / SQLAlchemy</span>
+            </div>
+            <div class="tech-item">
+                <strong>Frontend</strong>
+                <span>HTML5, CSS3, Vanilla JS</span>
+            </div>
+            <div class="tech-item">
+                <strong>Charts</strong>
+                <span>Canvas API</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="about-section">
+        <h2>API Endpoints</h2>
+        <table class="data-table">
+            <thead>
+                <tr><th>Method</th><th>Endpoint</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>GET</td><td>/api/fields</td><td>List all fields</td></tr>
+                <tr><td>POST</td><td>/api/fields</td><td>Create a new field</td></tr>
+                <tr><td>PUT</td><td>/api/fields/:id</td><td>Update a field</td></tr>
+                <tr><td>DELETE</td><td>/api/fields/:id</td><td>Delete a field</td></tr>
+                <tr><td>GET</td><td>/api/sensors</td><td>List all sensors</td></tr>
+                <tr><td>POST</td><td>/api/sensors</td><td>Create a sensor</td></tr>
+                <tr><td>GET</td><td>/api/readings</td><td>List recent readings</td></tr>
+                <tr><td>POST</td><td>/api/readings/ingest</td><td>Ingest a reading</td></tr>
+                <tr><td>POST</td><td>/api/readings/simulate/:field_id</td><td>Simulate readings</td></tr>
+                <tr><td>GET</td><td>/api/readings/history/:sensor_id</td><td>Sensor history</td></tr>
+                <tr><td>GET</td><td>/api/alerts</td><td>List active alerts</td></tr>
+                <tr><td>GET</td><td>/api/predictions/:field_id</td><td>Get prediction</td></tr>
+                <tr><td>POST</td><td>/api/predictions/:field_id/generate</td><td>Generate prediction</td></tr>
+                <tr><td>GET</td><td>/api/predictions/:field_id/zones</td><td>Zone health grid</td></tr>
+                <tr><td>GET</td><td>/api/dashboard/summary</td><td>Dashboard data</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="about-section">
+        <h2>License</h2>
+        <p>AgriWatch is released under the MIT License. See the LICENSE file for details.</p>
+    </div>
+</div>
+{% endblock %}

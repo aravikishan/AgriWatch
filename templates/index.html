@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="dashboard-header">
+    <h1>Farm Dashboard</h1>
+    <p class="subtitle">At-a-glance overview of your agricultural operation</p>
+</div>
+
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon">&#127806;</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ total_fields }}</span>
+            <span class="stat-label">Active Fields</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">&#128225;</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ sensor_count }}</span>
+            <span class="stat-label">Active Sensors</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">&#9888;&#65039;</div>
+        <div class="stat-info">
+            <span class="stat-value" id="alert-count">--</span>
+            <span class="stat-label">Active Alerts</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">&#127793;</div>
+        <div class="stat-info">
+            <span class="stat-value" id="avg-health">--</span>
+            <span class="stat-label">Avg Health Score</span>
+        </div>
+    </div>
+</div>
+
+<section class="dashboard-section">
+    <h2>Field Overview</h2>
+    <div class="field-cards">
+        {% for item in fields %}
+        <div class="field-card">
+            <div class="field-card-header">
+                <h3>{{ item.field.name }}</h3>
+                <span class="crop-badge">{{ item.field.crop_type }}</span>
+            </div>
+            <div class="field-card-body">
+                <div class="health-gauge" data-score="{{ item.health }}">
+                    <div class="gauge-fill" style="width: {{ item.health }}%"></div>
+                    <span class="gauge-label">{{ item.health }}%</span>
+                </div>
+                <div class="field-meta">
+                    <span>{{ item.field.size_hectares }} ha</span>
+                    <span>{{ item.field.sensors | length }} sensors</span>
+                </div>
+                {% if item.prediction %}
+                <div class="prediction-mini">
+                    <span class="stage-badge">{{ item.prediction.growth_stage }}</span>
+                    {% if item.prediction.predicted_yield %}
+                    <span class="yield-value">{{ item.prediction.predicted_yield }} t/ha</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="field-card-actions">
+                <button class="btn btn-sm" onclick="simulateReadings({{ item.field.id }})">Simulate</button>
+                <button class="btn btn-sm btn-secondary" onclick="generatePrediction({{ item.field.id }})">Predict</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="dashboard-section">
+    <h2>Recent Alerts</h2>
+    <div id="alerts-container" class="alerts-list">
+        <p class="loading">Loading alerts...</p>
+    </div>
+</section>
+
+<section class="dashboard-section">
+    <h2>Sensor Readings</h2>
+    <div class="chart-container">
+        <canvas id="dashboard-chart" width="800" height="300"></canvas>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardSummary();
+    loadAlerts();
+});
+</script>
+{% endblock %}
