@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  agriwatch:
+    build: .
+    container_name: agriwatch
+    ports:
+      - "8003:8003"
+    environment:
+      - AGRIWATCH_PORT=8003
+      - AGRIWATCH_DEBUG=false
+    volumes:
+      - agriwatch_data:/app/instance
+    restart: unless-stopped
+
+volumes:
+  agriwatch_data:
